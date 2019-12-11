@@ -14,7 +14,7 @@ wn.setworldcoordinates(-1, -1, 200, 200)
 balls = []
 states = ['b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b']
 chosed = "none"
-round = 3
+round = 4
 score = 0
 
 pen = turtle.Turtle()
@@ -72,13 +72,13 @@ def fin():
     turtle.clearscreen()
     wn = turtle.Screen()
     wn.bgcolor("blue")
-    pen = turtle.Turtle()
-    pen.speed(0)
-    pen.color("white")
-    pen.penup()
-    pen.goto(70,100)
-    pen.hideturtle()
-    pen.write("Good job! Your Score = {}".format(score), font=("Courier", 12, "normal"))
+    pen3 = turtle.Turtle()
+    pen3.speed(0)
+    pen3.color("white")
+    pen3.penup()
+    pen3.goto(70,100)
+    pen3.hideturtle()
+    pen3.write("Good job! Your Score = {}".format(score), font=("Courier", 12, "normal"))
 
 
 def draw():
@@ -114,7 +114,7 @@ def draw():
     if chosed == "s":
         pen.write("Swap with the right qubit (choose qubit)", font=("Courier", 12, "normal"))
     if chosed == "r":
-        pen.write("Reset (choose qubit)", font=("Courier", 12, "normal"))
+        pen.write("Reset (choose qubit - only grey ones)", font=("Courier", 12, "normal"))
     if chosed == "c":
         pen.write("Controlled Not gate (choose target qubit,control the qubit on the right)", font=("Courier", 12, "normal"))
     wn.tracer(True)
@@ -142,7 +142,7 @@ def clicked(x,y):
                     round = round - 1
                     circuit.h(qr[24-(i*5+j)])
 
-                if chosed == "r":
+                if chosed == "r" and states[i*5+j] == "g":
                     round = round - 1
                     circuit.reset(qr[24-(i*5+j)])
 
@@ -175,7 +175,7 @@ def clicked(x,y):
 
     if statesT[0] == statesT[1] and statesT[1] == statesT[2] and statesT[2] == statesT[3] and statesT[3] == statesT[4]:
          score = score + 20 + round*10
-         round = 3
+         round = 4
          circuit.reset(qr[24])
          circuit.reset(qr[23])
          circuit.reset(qr[22])
@@ -190,6 +190,16 @@ def clicked(x,y):
              for j in range(5):
                  circuit.swap(qr[24-(i*5+j)],qr[24-((i+1)*5+j)])
                  statesT[i*5+j],statesT[(i+1)*5+j] = statesT[(i+1)*5+j],statesT[i*5+j]
+
+         for i in range(4):
+             r= random.randint(0, 3)
+             print("d",r)
+             if r == 1:
+                 statesT[20+i]="w"
+                 circuit.x(qr[24-(20+i)])
+             if r == 2:
+                 statesT[20+i]="g"
+                 circuit.h(qr[24-(20+i)])
 
     states = statesT
     draw()
