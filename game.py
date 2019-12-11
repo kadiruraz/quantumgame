@@ -16,6 +16,8 @@ states = ['b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 
 chosed = "none"
 round = 4
 score = 0
+kolon = 0
+canHplay = True
 
 pen = turtle.Turtle()
 pen.speed(0)
@@ -27,7 +29,7 @@ pen2 = turtle.Turtle()
 pen2.speed(0)
 pen2.color("black")
 pen2.penup()
-pen2.goto(75,190)
+pen2.goto(60,190)
 pen2.hideturtle()
 
 wn.tracer(False)
@@ -82,7 +84,7 @@ def fin():
 
 
 def draw():
-    print(states)
+    #print(states)
     wn.tracer(False)
     for i in range(5):
         for j in range(5):
@@ -101,16 +103,19 @@ def draw():
             balls[i*5+j].goto(35+i*30,50+j*30)
 
     pen2.clear()
-    pen2.write("left:{} score:{}".format(round,score), font=("Courier", 20, "normal"))
+    pen2.write("left:{} score:{} column:{}".format(round,score,kolon), font=("Courier", 15, "normal"))
 
 
     pen.clear()
     if chosed == "none":
-        pen.write("Press on X,H,C,S or R", font=("Courier", 24, "normal"))
+        if canHplay:
+            pen.write("Press on X,H,C,S or R", font=("Courier", 20, "normal"))
+        else:
+            pen.write("Press on X,C,S or R (wait next column for H)", font=("Courier", 20, "normal"))
     if chosed == "x":
         pen.write("Not Gate (choose column)", font=("Courier", 12, "normal"))
     if chosed == "h":
-        pen.write("H Gate (choose qubit)", font=("Courier", 12, "normal"))
+        pen.write("H Gate (choose qubit - only once for each column) ", font=("Courier", 12, "normal"))
     if chosed == "s":
         pen.write("Swap with the right qubit (choose qubit)", font=("Courier", 12, "normal"))
     if chosed == "r":
@@ -119,7 +124,7 @@ def draw():
         pen.write("Controlled Not gate (choose target qubit,control the qubit on the right)", font=("Courier", 12, "normal"))
     wn.tracer(True)
 
-    if round == 0:
+    if round == 0 and (states[0] != states[1] or states[1] != states[2] or states[2] != states[3] or states[3] != states[4]):
         fin()
 
 
@@ -128,7 +133,9 @@ def clicked(x,y):
     global chosed
     global round
     global score
-    print(x," ",y)
+    global kolon
+    global canHplay
+    #print(x," ",y)
     for i in range(5):
         for j in range(5):
             if math.sqrt(math.pow(35+i*30-x,2) + math.pow(50+j*30-y,2)) <=5:
@@ -139,6 +146,7 @@ def clicked(x,y):
                         circuit.x(qr[24-(i*5+j)])
 
                 if chosed == "h":
+                    canHplay = False
                     round = round - 1
                     circuit.h(qr[24-(i*5+j)])
 
@@ -173,9 +181,18 @@ def clicked(x,y):
             elif statesT[i] == "w" and h[i] == "0":
                 statesT[i]="g"
 
+    states = statesT
+    draw()
+
     if statesT[0] == statesT[1] and statesT[1] == statesT[2] and statesT[2] == statesT[3] and statesT[3] == statesT[4]:
+         for i in range(1,5):
+            for j in range(5):
+                balls[i*5+j].speed(2)
+                balls[i*5+j].goto(35+(i-1)*30,50+j*30)
          score = score + 20 + round*10
          round = 4
+         kolon = kolon + 1
+         canHplay = True
          circuit.reset(qr[24])
          circuit.reset(qr[23])
          circuit.reset(qr[22])
@@ -193,7 +210,6 @@ def clicked(x,y):
 
          for i in range(4):
              r= random.randint(0, 3)
-             print("d",r)
              if r == 1:
                  statesT[20+i]="w"
                  circuit.x(qr[24-(20+i)])
@@ -212,9 +228,10 @@ def xgate():
 
 
 def hgate():
-    global chosed
-    chosed = "h"
-    draw()
+    if canHplay:
+        global chosed
+        chosed = "h"
+        draw()
 
 def swapq():
     global chosed
